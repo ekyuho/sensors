@@ -1,4 +1,5 @@
 //from http://playground.arduino.cc/LEDMatrix/Max7219
+// http://www.electroschematics.com/10510/arduino-8-8-led-matrix/
 
 int dataIn = 2;
 int load = 3;
