@@ -1,4 +1,5 @@
 // From  https://github.com/neojou/arduino-ameba/blob/master/example/pms3003-test/pms3003-test.ino
+// datasheet https://github.com/avaldebe/AQmon/blob/master/Documents/PMS3003_LOGOELE.pdf
 
 #include <SoftwareSerial.h>
 SoftwareSerial Serial1(7, 8); // RX, TX
