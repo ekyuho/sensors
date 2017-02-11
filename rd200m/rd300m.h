@@ -1,3 +1,6 @@
+// A library for FTLab's RD200M Radon Sensor
+// 2017-02-12 Kyuho KIm <ekyuho@gmail.com>
+//
 #ifndef Pms3003_h
 #define Pms3003_h
 
