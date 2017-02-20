@@ -1,0 +1,90 @@
+/*
+  Software serial multple serial test
+
+ Receives from the hardware serial, sends to software serial.
+ Receives from software serial, sends to hardware serial.
+
+ The circuit:
+ * RX is digital pin 10 (connect to TX of other device)
+ * TX is digital pin 11 (connect to RX of other device)
+
+ Note:
+ Not all pins on the Mega and Mega 2560 support change interrupts,
+ so only the following can be used for RX:
+ 10, 11, 12, 13, 50, 51, 52, 53, 62, 63, 64, 65, 66, 67, 68, 69
+
+ Not all pins on the Leonardo and Micro support change interrupts,
+ so only the following can be used for RX:
+ 8, 9, 10, 11, 14 (MISO), 15 (SCK), 16 (MOSI).
+
+ created back in the mists of time
+ modified 25 May 2012
+ by Tom Igoe
+ based on Mikal Hart's example
+
+ This example code is in the public domain.
+
+ */
+#include <SoftwareSerial.h>
+
+
+class Co2 {
+  public:
+    Co2(void);
+    void addchar(char);
+    int getvalue(void);
+  private:
+    int _value;
+    char _buf[10];
+    int _bp;
+    int stat;
+};
+
+Co2::Co2() {
+  _value = 0;
+  stat = 1;
+  _bp = 0;
+}
+
+void Co2::addchar(char c) {
+    switch(stat) {
+      case 1:
+        if (c == 0x0D) stat = 2;
+        break;
+      case 2:
+        if (c == 0x0A) { stat = 3; _bp=0; }
+        else Serial.println("error c="+ String(c));
+        break;
+      case 3:
+        if (c >= '0' && c <= '9')  _buf[_bp++] = c;
+        else if (c == 0x0D) { 
+          stat = 2; 
+          _buf[_bp++] = 0;
+          _value = atoi(_buf); 
+          _bp = 0;
+        }
+        else Serial.println("error c="+ String(c));
+    }  
+}
+
+int Co2::getvalue() {
+  int t = _value;
+  _value = 0;
+  return(t);
+}
+
+SoftwareSerial co2port(8, 13);
+Co2 co2;
+void setup() {
+  // Open serial communications and wait for port to open:
+  Serial.begin(115200);
+  co2port.begin(9600);
+}
+
+void loop() { // run over and over
+  int x;
+  if (co2port.available() > 0) {
+    co2.addchar((char)co2port.read());
+    if ((x = co2.getvalue())) Serial.println("Got Co2="+ String(x));
+  }
+}
