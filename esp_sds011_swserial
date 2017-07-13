@@ -6,7 +6,7 @@ Sds011 sds;
 bool in_cmd = false;
 extern int debug;
 
-int interval = 10; //sec
+int interval = 20; //sec
 extern "C" { 
 #include "user_interface.h" 
 }
