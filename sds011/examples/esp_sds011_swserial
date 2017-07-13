@@ -1,0 +1,71 @@
+#include <SoftwareSerial.h>
+SoftwareSerial swSer(D4, D3, false, 256);  //RX, TX
+
+#include <Sds011.h>
+Sds011 sds;
+bool in_cmd = false;
+extern int debug;
+
+int interval = 20; //sec
+extern "C" { 
+#include "user_interface.h" 
+}
+os_timer_t myTimer;
+bool tickOccured;
+void timerCallback(void *pArg) { tickOccured = true; } 
+void timer_init(void) {
+  os_timer_setfn(&myTimer, timerCallback, NULL);
+  os_timer_arm(&myTimer, interval*1000, true);
+  tickOccured = false;
+}
+
+unsigned long serial = 0;
+
+void gotit() { 
+    int a[2];
+    int num;
+    num = sds.get(a);
+    //a[0]=5;a[1]=10;a[2]=15;num=20;
+
+    //Serial.println("Free heap memory: "+String(ESP.getFreeHeap())+" Bytes.");
+    if (num ==0) {
+      Serial.println("got no data");
+      return;
+    }
+    
+    String p = "format=2&serial=" +String(serial++)+ "&items=0-D-" +String(a[0])+ ",1-D-" +String(a[1]);           
+    delivering(p);
+    //Serial.println("\n#data= "+ String(num) +" "+ p);
+}
+
+void setup() {
+   swSer.begin(9600);
+   Serial.begin(115200);
+   Serial.println("\nESPArduino ESP_sds011.cpp - 2017/6/5"); 
+   timer_init();
+
+   Serial.println("Free heap memory: "+String(ESP.getFreeHeap())+" Bytes.");
+   sds.onPacket(visualize);
+   show();
+   connect_ap();
+   sds.debug(debug);
+}
+
+void loop() {
+  if (tickOccured == true) {
+    //Serial.println("Tick Occurred");
+    tickOccured = false;
+    gotit();
+  }  
+  
+  while (swSer.available()) {
+    sds.append(swSer.read());
+    yield();
+  }
+  while (Serial.available()) {
+    in_cmd = true;
+    do_console();
+    yield();
+  }
+  yield();
+}
