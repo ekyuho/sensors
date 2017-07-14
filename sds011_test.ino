@@ -44,7 +44,10 @@ void loop() {
        cnt = 0;
        int pm25 = buf[0] + 256*buf[1];
        int pm10 = buf[2] + 256*buf[3];
-       Serial.println("PM2.5="+ String(pm25) +", PM10="+ String(pm10));
+       Serial.print(String(pm25) +","+ String(pm10)+ "  ");
+       for (int i=0; i< pm10/10; i++)
+         Serial.print("X");
+       Serial.println();
     }
   }
 }
